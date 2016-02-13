@@ -24,6 +24,7 @@ class TargetingSystem(object):
     self.rect     = None
     self.box      = None
     self.contours = None
+    self.midpoint = None
 
   def __del__( self ):
     #Free the camera
@@ -37,23 +38,34 @@ class TargetingSystem(object):
     self.max = val
 
   def nextFrame( self ):
-    self.frame  = self.camera.read()
+    n, self.frame  = self.camera.read()
 
-  def thresh( self ):
+  def thresholdFrame( self ):
     gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
     
     n, self.thresh = cv.threshold(gray, self.min, self.max, cv.THRESH_BINARY)
     
-  def contours( self ):
-    n, self.contours, h = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+  def findContours( self ):
+    n, self.contours, h = cv.findContours(self.thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     for cntr in self.contours:
         self.rect = cv.minAreaRect( cntr )
         self.box = cv.boxPoints( self.rect )
         self.box = np.int0( self.box )
         cv.drawContours( self.frame, [ self.box ], 0, (0,0,255), 2)
+
+        self.box = sorted(self.box, key=lambda point:point[1])
+        topLeft = self.box[0]
+        topRight = self.box[1]
+
+        self.midpoint = ( int((topLeft[0]+topRight[0])/2), int((topLeft[1]+topRight[1])/2) )
+
+        cv.circle( self.frame, self.midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
   
+  def showFrame( self ):
+    cv.imshow( 'frame', self.frame )
+
   def centroid( self ):
-    continue
+    None
 
   def run( self ):
     #Procedure
@@ -62,10 +74,13 @@ class TargetingSystem(object):
     self.nextFrame()
 
     #threshold the image
-    self.thresh()
+    self.thresholdFrame()
 
     #find and draw contours
-    self.contours()
+    self.findContours()
+
+    #show the frame
+    self.showFrame()
 
 
 def Usage():
@@ -73,17 +88,17 @@ def Usage():
     print("./TargetingSystem <CAMERA USB PORT> <THRESHOLD MIN> <THRESHOLD MAX>")
 
 if __name__ == '__main__':
-  if len( sys.argv < 2 ):
+  if len( sys.argv ) < 2 :
     Usage()
   else:
       print("Starting Targeting System...")
-      if len( sys.argv < 3 ):
-        usb = sys.argv[1]
+      if len( sys.argv ) < 3 :
+        usb = int(sys.argv[1])
         ts  = TargetingSystem( cam_usb=usb )
       else:
-        usb = sys.argv[1]
-        mn  = sys.argv[2]
-        mx  = sys.argv[3]
+        usb = int(sys.argv[1])
+        mn  = int(sys.argv[2])
+        mx  = int(sys.argv[3])
         ts  = TargetingSystem( cam_usb=usb, min_val=mn, max_val=mx )
 
       while(True):
