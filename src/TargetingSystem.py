@@ -3,6 +3,7 @@
 import numpy as np
 import cv2 as cv
 import sys
+import math
 
 # ===========================================================================
 # Targeting System Class
@@ -25,6 +26,7 @@ class TargetingSystem(object):
     self.box      = None
     self.contours = None
     self.midpoint = None
+    self.theta    = None
 
   def __del__( self ):
     #Free the camera
@@ -60,9 +62,21 @@ class TargetingSystem(object):
         self.midpoint = ( int((topLeft[0]+topRight[0])/2), int((topLeft[1]+topRight[1])/2) )
 
         cv.circle( self.frame, self.midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
-  
+        self.getTheta()  
+
   def showFrame( self ):
     cv.imshow( 'frame', self.frame )
+
+  def getTheta( self ):
+    topLeft  = self.box[0]
+    topRight = self.box[1]
+
+    x_off = abs(topLeft[0]-topRight[0])
+    y_off = abs(topLeft[1]-topRight[1])
+
+    self.theta = math.degrees(math.atan(y_off/x_off))
+
+    cv.putText(self.frame, str(self.theta), (self.midpoint[0]+5, self.midpoint[1]+5), 1, 1.0, (0,255,0))
 
   def centroid( self ):
     None
