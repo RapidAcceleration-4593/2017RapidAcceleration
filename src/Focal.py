@@ -36,7 +36,7 @@ class Focal(object):
     ratio = ( self.known_real_distance / self.known_real_width )
     self.focal_length = self.known_pixel_width * ratio
 
-  def CalculateActualDistance( self, current_pixel_width ):
+  def calculateActualDistance( self, current_pixel_width ):
     ratio = self.focal_length / current_pixel_width
     self.actual_real_distance = self.known_real_width * ratio
 
@@ -51,6 +51,5 @@ def Usage():
 if __name__ == '__main__':
   f = Focal( )
   f.setFocalLength( )
-  f.CalculateCurrentPixelWidth( )
   f.CalculateActualDistance( )
   print( f.getDistance( ) )
