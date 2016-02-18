@@ -16,16 +16,13 @@ class Focal(object):
     self.focal_length = None
 
     #This should never change once we know this
-    self.known_pixel_width = 361
+    self.known_pixel_width = None
 
     #This will never change
     self.known_real_width = 0.3556
 
     #This will never change
     self.known_real_distance = 0.9144
-
-    #This will change every single frame
-    self.current_pixel_width = None
 
     #This is what we want
     self.actual_real_distance = None
@@ -39,20 +36,9 @@ class Focal(object):
     ratio = ( self.known_real_distance / self.known_real_width )
     self.focal_length = self.known_pixel_width * ratio
 
-  def CalculateActualDistance( self ):
-    ratio = self.focal_length / self.current_pixel_width
+  def CalculateActualDistance( self, current_pixel_width ):
+    ratio = self.focal_length / current_pixel_width
     self.actual_real_distance = self.known_real_width * ratio
-
-  def CalculateCurrentPixelWidth( self ):
-    #read frame from image
-
-    #find left side of contours
-
-    #find right side of contours
-
-    #calculate distance
-
-    #return pixel width
 
   def getDistance( self );
     return self.actual_real_distance
