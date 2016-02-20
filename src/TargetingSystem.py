@@ -4,6 +4,7 @@ import numpy as np
 import cv2 as cv
 import sys
 import math
+import Focal
 
 # ===========================================================================
 # Targeting System Class
@@ -29,6 +30,11 @@ class TargetingSystem(object):
     self.width    = None
     self.height   = None
     self.frameMid = None
+    self.pixwid   = 0
+
+    #setup focal
+    self.focal = Focal.Focal()
+    self.focal.setFocalLength()
 
     #get width and height
     self.getWidthHeight()
@@ -46,6 +52,10 @@ class TargetingSystem(object):
 
   def nextFrame( self ):
     n, self.frame  = self.camera.read()
+    self.frame = cv.flip(self.frame, flipCode=-1)
+
+  def getPixWid( self ):
+    return self.pixwid
 
   def getWidthHeight( self ):
     n, f = self.camera.read()
@@ -66,23 +76,24 @@ class TargetingSystem(object):
       self.box = np.int0( self.box )
       
       if set(self.box[0]) != set(self.box[1]):
-        cv.drawContours( self.frame, [ self.box ], 0, (0,0,255), 2)
 
-        self.box = sorted(self.box, key=lambda point:point[1])
-        topLeft = self.box[0]
-        topRight = self.box[1]
-        print( topLeft )
-        print( topRight )
-        print( abs(topLeft[0] - topRight[0] ) )
+        sortedbox = sorted(self.box, key=lambda point:point[1])
+        topLeft = sortedbox[0]
+        topRight = sortedbox[1]
+        wid = abs(topLeft[0] - topRight[0])
 
-        midpoint = ( int((topLeft[0]+topRight[0])/2), int((topLeft[1]+topRight[1])/2) )
+        if wid > 30 and wid < 320:
+          self.pixwid = abs(topLeft[0] - topRight[0])
 
-        if not shot:
-          shot = self.checkShot(midpoint)
+          cv.drawContours( self.frame, [ self.box ], 0, (0,0,255), 2)
+          midpoint = ( int((topLeft[0]+topRight[0])/2), int((topLeft[1]+topRight[1])/2) )
 
-        cv.circle( self.frame, midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
+          if not shot:
+            shot = self.checkShot(midpoint)
 
-        self.getTheta(midpoint)  
+          cv.circle( self.frame, midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
+
+          self.getTheta(midpoint)  
 
     return shot
 
@@ -112,6 +123,7 @@ class TargetingSystem(object):
 
   def drawCrosshair( self, shot ):
     if shot:
+      print( "SHOOT" ) 
       cv.circle( self.frame, (int(self.width/2), int(self.height/2)), 20, (0,255,0), thickness=2, lineType=8, shift=0 )
       cv.line( self.frame, (int((self.width/2)-20), int(self.height/2)), (int((self.width/2+20)), int(self.height/2)), (0,255,0), thickness=1 )
       cv.line( self.frame, ( int(self.width/2), int((self.height/2)-20)), (int(self.width/2), int((self.height/2+20))), (0,255,0), thickness=1 )
@@ -125,7 +137,7 @@ class TargetingSystem(object):
     None
 
   def readImg( self ):
-    self.frame = cv.imread('bootydist.png')
+    self.frame = cv.imread('setdist.png')
 
   def writeImg( self ):
     cv.imwrite('camimg.png', self.frame)
@@ -134,8 +146,8 @@ class TargetingSystem(object):
     #Procedure
     
     #get next frame from camera feed
-    #self.nextFrame()
-    self.readImg()
+    self.nextFrame()
+    #self.readImg()
 
     #threshold the image
     self.thresholdFrame()
@@ -143,11 +155,19 @@ class TargetingSystem(object):
     #find and draw contours
     shot = self.findContours()
 
+    pix = self.getPixWid()
+
+    self.focal.calculateActualDistance( pix )
+
+    distance = self.focal.getDistance()
+
+    print(distance)
+
     self.drawCrosshair(shot)
 
     #show the frame
-    #self.showFrame()
-    self.writeImg()
+    self.showFrame()
+    #self.writeImg()
 
 
 def Usage():
@@ -168,8 +188,8 @@ if __name__ == '__main__':
         mx  = int(sys.argv[3])
         ts  = TargetingSystem( cam_usb=usb, min_val=mn, max_val=mx )
 
-      #while(True):
-      ts.run()
-      #if cv.waitKey(1) & 0xFF == ord('q'):
-      #  break
+      while(True):
+        ts.run()
+        if cv.waitKey(1) & 0xFF == ord('q'):
+          break
       del ts
