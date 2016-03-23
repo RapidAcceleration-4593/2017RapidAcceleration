@@ -122,7 +122,7 @@ class TargetingSystem(object):
 
   def drawCrosshair( self, shot ):
     if shot:
-      print( "SHOOT" ) 
+      #print( "SHOOT" ) 
       cv.circle( self.frame, (int(self.width/2), int(self.height/2)), 20, (0,255,0), thickness=2, lineType=8, shift=0 )
       cv.line( self.frame, (int((self.width/2)-20), int(self.height/2)), (int((self.width/2+20)), int(self.height/2)), (0,255,0), thickness=1 )
       cv.line( self.frame, ( int(self.width/2), int((self.height/2)-20)), (int(self.width/2), int((self.height/2+20))), (0,255,0), thickness=1 )
@@ -160,13 +160,14 @@ class TargetingSystem(object):
 
     distance = self.focal.getDistance()
 
-    print(distance)
+    #print(distance)
 
     self.drawCrosshair(shot)
 
     #show the frame
-    self.showFrame()
+    #self.showFrame()
     #self.writeImg()
+    return self.frame, distance
 
 # ===========================================================================
 # Targeting System Class
