@@ -79,7 +79,7 @@ class TargetingSystem(object):
 
        # if not shot:
           #shot = self.checkShot(midpoint)
-
+ 
         #cv.circle( self.frame, midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
 
         self.getTheta(midpoint)  
