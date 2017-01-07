@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 import numpy as np
 import cv2 as cv
@@ -77,10 +77,10 @@ class TargetingSystem(object):
 
         midpoint = ( int((topLeft[0]+topRight[0])/2), int((topLeft[1]+topRight[1])/2) )
 
-        if not shot:
-          shot = self.checkShot(midpoint)
+       # if not shot:
+          #shot = self.checkShot(midpoint)
 
-        cv.circle( self.frame, midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
+        #cv.circle( self.frame, midpoint, 5, (0,255,0), thickness=2, lineType=8, shift=0 )
 
         self.getTheta(midpoint)  
 
@@ -108,7 +108,7 @@ class TargetingSystem(object):
 
     self.theta = math.degrees(math.atan(y_off/x_off))
 
-    cv.putText(self.frame, str(self.theta), (midpoint[0]+5, midpoint[1]+5), 1, 1.0, (0,255,0))
+    #cv.putText(self.frame, str(self.theta), (midpoint[0]+5, midpoint[1]+5), 1, 1.0, (0,255,0))
 
   def drawCrosshair( self, shot ):
     if shot:
@@ -134,8 +134,8 @@ class TargetingSystem(object):
     #Procedure
     
     #get next frame from camera feed
-    #self.nextFrame()
-    self.readImg()
+    self.nextFrame()
+    #self.readImg()
 
     #threshold the image
     self.thresholdFrame()
@@ -146,8 +146,8 @@ class TargetingSystem(object):
     self.drawCrosshair(shot)
 
     #show the frame
-    #self.showFrame()
-    self.writeImg()
+    self.showFrame()
+    #self.writeImg()
 
 
 def Usage():
@@ -168,8 +168,8 @@ if __name__ == '__main__':
         mx  = int(sys.argv[3])
         ts  = TargetingSystem( cam_usb=usb, min_val=mn, max_val=mx )
 
-      #while(True):
-      ts.run()
-      #if cv.waitKey(1) & 0xFF == ord('q'):
-      #  break
+      while(True):
+        ts.run()
+        if cv.waitKey(1) & 0xFF == ord('q'):
+          break
       del ts
