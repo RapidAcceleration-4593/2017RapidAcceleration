@@ -1,0 +1,6 @@
+negatives/neg1.png
+negatives/neg2.png
+negatives/neg3.png
+negatives/neg4.png
+negatives/neg5.png
+negatives/neg6.png
